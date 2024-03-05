@@ -1,0 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+:root {
+    --color-light-50: #f1f1f1;
+    --color-light-150: #e6e3e3;
+    
+    --color-dark-600: #555555;
+    --color-dark-900: #000;
+
+    --color-blue-50: #9AD1D4;
+    --color-blue-100: #80CED7;
+    --color-blue-200: #089dcf;
+    --color_blue-600: #042636;
+
+    --color-gradient: linear-gradient(90deg, var(--color-blue-200), var(--color-blue-100),
+            var(--color-blue-50));
+}
+
+* {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: var(--color-gradient);
+}
+
+#container {
+    background: var(--color-light-50);
+    width: 40vh;
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1);
+}
+
+#send {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--color-light-150);
+    border-radius: 10px;
+    padding: 4px 12px;
+}
+
+#send input {
+    border: none;
+    background-color: transparent;
+    font-size: 16px;
+    width: 100%;
+}
+
+#send input:focus-visible {
+    outline: none;
+}
+
+#send button {
+    background-color: var(--color-blue-50);
+    border-radius: 50%;
+    padding: 5px 9px;
+    border: none;
+    cursor: pointer;
+}
+
+#send button:hover {
+    transform: scale(1.05);
+}
+
+#good_result_test {
+    display: none;
+}
+
+#good_result_test.show {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--color-dark-600);
+    margin-top: 20px;
+    gap: 10px;
+}
+
+#bad_result_test {
+    display: none;
+}
+
+#bad_result_test.show {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--color-dark-600);
+    margin-top: 20px;
+    gap: 10px;
+}
+
+#error_comment {
+    display: none;
+}
+
+#error_comment.show {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--color-dark-600);
+    margin-top: 20px;
+}
+
+#good_face {
+    color: green;
+}
+
+#bad_face {
+    color: red;    
+}
