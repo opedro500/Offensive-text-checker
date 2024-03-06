@@ -3,12 +3,15 @@ document.querySelector('#send').addEventListener('submit', (e) => {
 
     const text = document.querySelector('#verify_text').value;
 
+    removeClass();
+
     if (!text) {
-        removeClass();
         document.querySelector('#error_comment').classList.add('show');
 
         return;
     }
+
+    document.querySelector('#custom_loader_box').classList.add('show');
 
     const key = "AIzaSyBPEowkUcyUHjH8NT7mW1OAnDW3uGMH7SQ";
     const url = `https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=${key}`;
@@ -42,6 +45,7 @@ document.querySelector('#send').addEventListener('submit', (e) => {
 });
 
 function removeClass() {
+    document.querySelector('#custom_loader_box').classList.remove('show');
     document.querySelector('#error_comment').classList.remove('show');
     document.querySelector('#good_result_test').classList.remove('show');
     document.querySelector('#bad_result_test').classList.remove('show');

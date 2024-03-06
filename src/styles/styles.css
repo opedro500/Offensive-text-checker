@@ -71,6 +71,28 @@ body {
     transform: scale(1.05);
 }
 
+#custom_loader_box {
+    display: none;
+}
+
+#custom_loader_box.show {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+#custom_loader {
+    width:25px;
+    height:25px;
+    border-radius:50%;
+    border:4px solid;
+    border-color: var(--color-light-150);
+    border-right-color: var(--color-dark-600);
+    animation:s2 1s infinite linear;
+  }
+  @keyframes s2 {to{transform: rotate(1turn)}}
+
 #good_result_test {
     display: none;
 }
