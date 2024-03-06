@@ -28,11 +28,11 @@ document.querySelector('#send').addEventListener('submit', (e) => {
     })
         .then(response => response.json())
         .then(data => {
+            removeClass();
+
             if (data.attributeScores && data.attributeScores.TOXICITY.summaryScore.value > 0.5) {
-                removeClass();
                 document.querySelector('#bad_result_test').classList.add('show');
             } else {
-                removeClass();
                 document.querySelector('#good_result_test').classList.add('show');
             }
         })

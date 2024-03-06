@@ -3,7 +3,7 @@
 :root {
     --color-light-50: #f1f1f1;
     --color-light-150: #e6e3e3;
-    
+
     --color-dark-600: #555555;
     --color-dark-900: #000;
 
@@ -79,6 +79,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    font-size: 25px;
     color: var(--color-dark-600);
     margin-top: 20px;
     gap: 10px;
@@ -92,6 +93,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    font-size: 25px;
     color: var(--color-dark-600);
     margin-top: 20px;
     gap: 10px;
@@ -105,6 +107,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    font-size: 25px;
     color: var(--color-dark-600);
     margin-top: 20px;
 }
@@ -114,5 +117,5 @@ body {
 }
 
 #bad_face {
-    color: red;    
+    color: red;
 }
