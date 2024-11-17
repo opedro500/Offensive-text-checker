@@ -33,9 +33,10 @@ body {
 
 #container {
     background: var(--color-light-50);
-    width: 40vh;
+    width: 360px;
     border-radius: 20px;
     padding: 18px;
+    margin: 0px 30px;
     box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1);
 }
 
