@@ -11,9 +11,8 @@ O principal objetivo deste projeto foi:
 
 ## Funcionalidades
 
-- **Detecção de Textos Ofensivos**: O sistema analisa o texto enviado pelo usuário e fornece uma resposta, indicando se o texto contém palavras ou frases prejudiciais.
-- **Interface Interativa**: O usuário pode inserir um texto na interface e receber a avaliação em tempo real sobre o nível de toxicidade.
-- **Exibição de Resultados**: A pontuação de toxicidade é exibida junto com uma descrição de como o conteúdo foi classificado pela API.
+- **Detecção de Textos Ofensivos**: O sistema analisa o texto enviado pelo usuário através de uma pontuação de toxicidade e fornece uma resposta, indicando se o texto contém palavras ou frases prejudiciais.
+- **Interface Interativa**: O usuário pode inserir um texto na interface e receber a avaliação em tempo real.
 
 ## Tecnologias Utilizadas
 
