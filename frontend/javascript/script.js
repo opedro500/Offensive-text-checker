@@ -7,19 +7,15 @@ document.querySelector('#send').addEventListener('submit', (e) => {
 
     if (!text) {
         document.querySelector('#error_comment').classList.add('show');
-
         return;
     }
 
     document.querySelector('#custom_loader_box').classList.add('show');
 
-    const key = "AIzaSyBPEowkUcyUHjH8NT7mW1OAnDW3uGMH7SQ";
-    const url = `https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=${key}`;
+    const url = "http://localhost:8000/check";
 
     const data = JSON.stringify({
-        comment: { text: text },
-        languages: ["pt"],
-        requestedAttributes: { TOXICITY: {} }
+        text: text
     });
 
     fetch(url, {
@@ -33,14 +29,17 @@ document.querySelector('#send').addEventListener('submit', (e) => {
         .then(data => {
             removeClass();
 
-            if (data.attributeScores && data.attributeScores.TOXICITY.summaryScore.value > 0.5) {
+            if (data.is_offensive) {
                 document.querySelector('#bad_result_test').classList.add('show');
+                console.log(`Ofensivo! Certeza do modelo: ${data.confidence}`);
             } else {
                 document.querySelector('#good_result_test').classList.add('show');
+                console.log(`Seguro! Certeza da modelo: ${data.confidence}`);
             }
         })
         .catch(error => {
             console.error("Erro ao analisar o texto:", error);
+            removeClass();
         });
 });
 

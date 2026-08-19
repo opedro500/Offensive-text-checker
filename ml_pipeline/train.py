@@ -40,30 +40,28 @@ wandb.init(
 nltk.download('stopwords', quiet=True)
 STOP_WORDS_PT = set(stopwords.words('portuguese'))
 
-def limpar_texto(texto):
+def limpar_texto_bert(texto):
     texto = str(texto).lower()
+    # Remove APENAS Links e menções de usuário
     texto = re.sub(r'http\S+|www\.\S+', '', texto)  
     texto = re.sub(r'@\w+', '', texto)             
-    texto = re.sub(r'\brt\b', '', texto)           
-    texto = re.sub(r'\d+', '', texto)              
-    texto = re.sub(r'[^\w\s]', '', texto)          
-    texto = texto.replace('_', '')                 
+    texto = re.sub(r'\brt\b', '', texto)  
     
-    palavras = texto.split()
-    palavras_limpas = [p for p in palavras if p not in STOP_WORDS_PT]
-    return ' '.join(palavras_limpas)
+    return texto.strip()
 
 # ==========================================
-# 3. CARREGAMENTO DOS DADOS (ToLD-BR)
+# 3. CARREGAMENTO DOS DADOS (HateBR)
 # ==========================================
-print("Carregando o dataset ToLD-BR...")
-df = pd.read_csv("ml_pipeline/data/ToLD-BR.csv")
+print("Carregando o dataset HateBR...")
+# Certifique-se de que o nome do arquivo bate com o que você salvou
+df = pd.read_csv("ml_pipeline/data/HateBR.csv")
 
-print("Gerando labels e limpando textos...")
-colunas_de_toxicidade = ['homophobia', 'obscene', 'insult', 'racism', 'misogyny', 'xenophobia']
-df['label'] = (df[colunas_de_toxicidade].max(axis=1) > 0).astype(int)
+print("Preparando colunas e limpando textos...")
+# Renomeamos as colunas para o padrão que o resto do código já usa
+df = df[['comentario', 'label_final']].rename(columns={'comentario': 'text', 'label_final': 'label'})
 
-df['text'] = df['text'].apply(limpar_texto)
+# Aplicamos a função de limpeza amigável ao BERT
+df['text'] = df['text'].apply(limpar_texto_bert)
 
 textos = df['text'].tolist()
 labels = df['label'].tolist()
