@@ -6,14 +6,14 @@ miniconda3/
 ml_pipeline/data/
 *.csv
 
-ml_pipeline/resultados/
-backend/model/
+backend/models/
 *.keras
 *.h5
 *.pt
 *.safetensors
 *.bin
 *.pth
+*.pkl
 
 wandb/
 *.log

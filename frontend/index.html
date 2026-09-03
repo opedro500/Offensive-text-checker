@@ -16,16 +16,24 @@
         <form action="" id="send" autocomplete="off">
             <i class="fa-regular fa-comment-dots"></i>
             <input type="search" name="verify_text" id="verify_text" placeholder="Digite um comentário">
-            <button type="submit">
+            <button type="submit" title="Enviar">
                 <i class="fa-solid fa-paper-plane"></i>
             </button>
         </form>
 
-        <select id="model_level" title="Escolha a Inteligência Artificial">
-            <option value="1">Nível 1: TF-IDF</option>
-            <option value="2">Nível 2: GRU</option>
-            <option value="3" selected>Nível 3: BERTimbau</option>
-        </select>
+        <div id="ai_selector_container">
+            <button type="button" id="toggle_model_btn" title="Modelos de IA">
+                <i class="fa-solid fa-brain"></i>
+            </button>
+            
+            <div id="select_wrapper">
+                <select id="model_level">
+                    <option value="1">Nível 1: TF-IDF</option>
+                    <option value="2">Nível 2: GRU</option>
+                    <option value="3" selected>Nível 3: BERTimbau</option>
+                </select>
+            </div>
+        </div>
 
         <div id="custom_loader_box">
             <div id="custom_loader"></div>

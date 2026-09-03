@@ -1,3 +1,7 @@
+document.querySelector('#toggle_model_btn').addEventListener('click', () => {
+    document.querySelector('#select_wrapper').classList.toggle('show-select');
+});
+
 document.querySelector('#send').addEventListener('submit', (e) => {
     e.preventDefault();
 

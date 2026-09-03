@@ -1,22 +1,28 @@
-# Checador de Texto Ofensivo - Usando Google Perspective API
+Projeto: Classificador de Comentários Ofensivos (Substituto da Perspective API)
 
-Este é um projeto pessoal de um **checador de texto ofensivo** desenvolvido com o intuito de detectar e analisar o tom de um texto, utilizando a **API Google Perspective**. A aplicação avalia o nível de toxicidade em um texto inserido pelo usuário e classifica-o com base em critérios como ofensa, insultos e outros comportamentos tóxicos.
+Este projeto é uma versão renovada de um antigo sistema de moderação de texto. A iniciativa de reconstruí-lo do zero surgiu após a descontinuação da Perspective API do Google, o que nos motivou a criar uma solução de inteligência artificial totalmente independente, de código aberto, executada localmente e especializada na língua portuguesa.
 
-## Objetivo
+**A Arquitetura de 3 Níveis**
+O sistema permite classificar a toxicidade de um texto alternando em tempo real entre três abordagens de Machine Learning:
 
-O principal objetivo deste projeto foi:
-- Aprender a integrar APIs externas em projetos frontend.
-- Trabalhar com a **Google Perspective API**, uma ferramenta poderosa para análise de texto.
-- Criar uma interface simples e intuitiva que permita aos usuários verificar se o conteúdo de um texto pode ser considerado ofensivo.
+* Nível 1 (Clássico): TF-IDF + Regressão Logística. Uma abordagem estatística leve e ultrarrápida baseada na frequência de palavras, com limpeza agressiva de stopwords.
+* Nível 2 (Sequencial): Rede Neural Recorrente (GRU). Lê o texto da esquerda para a direita retendo memória de curto prazo, permitindo a compreensão de gírias e do contexto básico da frase.
+* Nível 3 (Estado da Arte): BERTimbau (Transformer). Um modelo colossal de 110 milhões de parâmetros treinado pela NeuralMind. O modelo passou por um Fine-Tuning específico para entender o sarcasmo e a semântica profunda da ofensa no vocabulário brasileiro.
 
-## Funcionalidades
+**Como Executar o Projeto (Docker)**
+A aplicação foi construída para rodar em um container unificado que já atende a API e a interface gráfica simultaneamente.
 
-- **Detecção de Textos Ofensivos**: O sistema analisa o texto enviado pelo usuário através de uma pontuação de toxicidade e fornece uma resposta, indicando se o texto contém palavras ou frases prejudiciais.
-- **Interface Interativa**: O usuário pode inserir um texto na interface e receber a avaliação em tempo real.
+1. Construa a imagem Docker na raiz do projeto (isso instalará as dependências e o pacote NLTK automaticamente):
+docker build -t checador-ofensas .
 
-## Tecnologias Utilizadas
+2. Inicie o container liberando a porta local:
+docker run -p 8000:8000 checador-ofensas
 
-- **HTML/CSS**: Estruturação e estilização da interface da aplicação.
-- **JavaScript**: Responsável por interagir com a API Google Perspective e gerenciar a lógica da aplicação.
-- **API Google Perspective**: Usada para analisar o texto e calcular a pontuação de toxicidade.
-- **Git**: Controle de versão para o desenvolvimento do projeto.
+3. Acesse o sistema abrindo o seu navegador no endereço:
+http://localhost:8000
+
+**Stack Tecnológica**
+* Backend: Python 3.10, FastAPI, Uvicorn
+* Machine Learning: TensorFlow/Keras, Hugging Face Transformers, Scikit-Learn, NLTK
+* Frontend: HTML, CSS Flexbox, Vanilla JavaScript, FontAwesome
+* MLOps (Treinamento prévio): Weights & Biases (WandB Sweep e Bayes Optimization)
