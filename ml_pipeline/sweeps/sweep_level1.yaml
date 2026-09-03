@@ -1,0 +1,14 @@
+program: ml_pipeline/train_level1.py
+method: bayes
+metric:
+  name: val_accuracy
+  goal: maximize
+parameters:
+  max_features:
+    values: [1000, 3000, 5000, 10000]
+  ngram_max:
+    values: [1, 2, 3]
+  C:
+    values: [0.01, 0.1, 1.0, 10.0]
+  solver:
+    values: ["lbfgs", "liblinear"]
