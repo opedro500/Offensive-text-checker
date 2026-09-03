@@ -8,6 +8,9 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# OTIMIZAÇÃO: Baixa as stopwords no momento da build da imagem
+RUN python -m nltk.downloader stopwords
+
 # Copia a pasta do backend (com o modelo dentro) e do frontend
 COPY backend/ ./backend/
 COPY frontend/ ./frontend/

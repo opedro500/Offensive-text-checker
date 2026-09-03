@@ -2,20 +2,22 @@ document.querySelector('#send').addEventListener('submit', (e) => {
     e.preventDefault();
 
     const text = document.querySelector('#verify_text').value;
+    const level = document.querySelector('#model_level').value;
 
     removeClass();
 
-    if (!text) {
+    if (!text.trim()) {
         document.querySelector('#error_comment').classList.add('show');
         return;
     }
 
     document.querySelector('#custom_loader_box').classList.add('show');
 
-    const url = "http://localhost:8000/check";
+    const url = "/predict";
 
     const data = JSON.stringify({
-        text: text
+        text: text,
+        level: level
     });
 
     fetch(url, {
@@ -25,22 +27,28 @@ document.querySelector('#send').addEventListener('submit', (e) => {
             "Content-Type": "application/json"
         }
     })
-        .then(response => response.json())
-        .then(data => {
-            removeClass();
+    .then(response => response.json())
+    .then(data => {
+        removeClass();
 
-            if (data.is_offensive) {
-                document.querySelector('#bad_result_test').classList.add('show');
-                console.log(`Ofensivo! Certeza do modelo: ${data.confidence}`);
-            } else {
-                document.querySelector('#good_result_test').classList.add('show');
-                console.log(`Seguro! Certeza da modelo: ${data.confidence}`);
-            }
-        })
-        .catch(error => {
-            console.error("Erro ao analisar o texto:", error);
-            removeClass();
-        });
+        if (data.offensive) {
+            const badBox = document.querySelector('#bad_result_test');
+            badBox.querySelector('span').innerText = `Ofensivo (${data.confidence}%)`;
+            badBox.classList.add('show');
+        } else {
+            const goodBox = document.querySelector('#good_result_test');
+            const safeConfidence = (100 - data.confidence).toFixed(2);
+            goodBox.querySelector('span').innerText = `Legal (${safeConfidence}%)`;
+            goodBox.classList.add('show');
+        }
+    })
+    .catch(error => {
+        console.error("Erro ao analisar o texto:", error);
+        removeClass();
+        const errorBox = document.querySelector('#error_comment');
+        errorBox.innerText = "Erro no servidor.";
+        errorBox.classList.add('show');
+    });
 });
 
 function removeClass() {
@@ -48,4 +56,6 @@ function removeClass() {
     document.querySelector('#error_comment').classList.remove('show');
     document.querySelector('#good_result_test').classList.remove('show');
     document.querySelector('#bad_result_test').classList.remove('show');
-};
+    
+    document.querySelector('#error_comment').innerText = "Digite um comentário...";
+}

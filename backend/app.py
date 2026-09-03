@@ -1,99 +1,90 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
-import tensorflow as tf
-from transformers import BertTokenizerFast, TFBertForSequenceClassification
+import joblib
+import pickle
 import re
-import os
+import nltk
+from nltk.corpus import stopwords
+import tensorflow as tf
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from transformers import AutoTokenizer, TFAutoModelForSequenceClassification
 
-# ==========================================
-# 1. CONFIGURAÇÃO DA API
-# ==========================================
-app = FastAPI(
-    title="Checador de Toxicidade",
-    description="API para detectar linguagem ofensiva usando BERTimbau"
-)
+# O download do NLTK já foi feito no Dockerfile, mas garantimos aqui
+nltk.download('stopwords', quiet=True)
+stop_words = set(stopwords.words('portuguese'))
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+app = FastAPI(title="API de Classificação de Ofensas")
 
-# ==========================================
-# 2. CARREGAMENTO DO MODELO (Em Memória)
-# ==========================================
-MODEL_PATH = "backend/model/bert_ofensivo"
+# --- Carregamento dos Modelos ---
+vec_l1 = joblib.load("backend/models/level1_tfidf/vectorizer.pkl")
+mod_l1 = joblib.load("backend/models/level1_tfidf/model.pkl")
 
-print('Iniciando servidor e carregando o "cérebro" do BERT... Isso pode levar alguns segundos.')
-tokenizer = BertTokenizerFast.from_pretrained(MODEL_PATH)
-model = TFBertForSequenceClassification.from_pretrained(MODEL_PATH)
+with open("backend/models/level2_gru/tokenizer.pkl", "rb") as f:
+    tok_l2 = pickle.load(f)
+mod_l2 = tf.keras.models.load_model("backend/models/level2_gru/model.h5")
 
-# ==========================================
-# 3. FUNÇÕES AUXILIARES (Nova Limpeza Leve)
-# ==========================================
-def limpar_texto_bert(texto):
+tok_l3 = AutoTokenizer.from_pretrained("backend/models/level3_bert")
+mod_l3 = TFAutoModelForSequenceClassification.from_pretrained("backend/models/level3_bert")
+
+# --- Estrutura dos Dados (Pydantic) ---
+class PredictRequest(BaseModel):
+    text: str
+    level: str = "3"
+
+# --- Funções de Limpeza ---
+def limpar_texto_base(texto):
     texto = str(texto).lower()
-    # Remove APENAS Links e menções de usuário, mantendo a gramática para o BERT!
-    texto = re.sub(r'http\S+|www\.\S+', '', texto)  
-    texto = re.sub(r'@\w+', '', texto)             
-    texto = re.sub(r'\brt\b', '', texto)           
+    texto = re.sub(r'http\S+|www\.\S+', '', texto)
+    texto = re.sub(r'@\w+', '', texto)
+    texto = re.sub(r'\brt\b', '', texto)
     return texto.strip()
 
-# Molde de como a requisição deve chegar
-class TextoRequest(BaseModel):
-    text: str
+def limpar_texto_agressivo(texto):
+    texto = limpar_texto_base(texto)
+    texto = re.sub(r'\d+', '', texto)
+    texto = re.sub(r'[^\w\s]', '', texto)
+    return ' '.join([p for p in texto.split() if p not in stop_words])
 
-# ==========================================
-# 4. ROTA PRINCIPAL DE PREDIÇÃO
-# ==========================================
-@app.post("/check")
-async def checar_toxicidade(request: TextoRequest):
-    try:
-        # 1. Limpa o texto
-        texto_limpo = limpar_texto_bert(request.text)
-        
-        # 2. Transforma o texto em números (Tensores)
-        tokens = tokenizer(
-            [texto_limpo],
-            padding="max_length",
-            truncation=True,
-            max_length=64,
-            return_tensors="tf"
-        )
-        
-        # 3. Pede para a IA fazer a previsão (Forma 100% segura extraindo como dict)
-        saida = model({
-            "input_ids": tokens["input_ids"],
-            "attention_mask": tokens["attention_mask"],
-            "token_type_ids": tokens["token_type_ids"]
-        })
-        
-        logits = saida.logits
-        
-        # 4. Transforma os números brutos (logits) em porcentagens
-        probabilidades = tf.nn.softmax(logits, axis=1).numpy()[0]
-        
-        # Classe 0 = Seguro, Classe 1 = Ofensivo
-        classe_vencedora = int(tf.argmax(logits, axis=1).numpy()[0])
-        is_offensive = bool(classe_vencedora == 1)
-        
-        # Pega a % de certeza da classe que ganhou
-        confianca = float(probabilidades[classe_vencedora])
-        
-        return {
-            "original_text": request.text,
-            "cleaned_text": texto_limpo,
-            "is_offensive": is_offensive,
-            "confidence": f"{confianca * 100:.2f}%"
-        }
-        
-    except Exception as e:
-        # Se algo der errado, a API não quebra! Ela devolve o erro para nós.
-        print(f"ERRO INTERNO NA PREVISÃO: {e}")
-        return {"error": str(e)}
+# --- Rotas da API ---
+@app.post("/predict")
+async def predict(req: PredictRequest):
+    if not req.text.strip():
+        raise HTTPException(status_code=400, detail="Texto vazio")
 
-app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
+    if req.level == '1':
+        texto_limpo = limpar_texto_agressivo(req.text)
+        X = vec_l1.transform([texto_limpo])
+        score = float(mod_l1.predict_proba(X)[0][1])
+        
+    elif req.level == '2':
+        texto_limpo = limpar_texto_base(req.text)
+        seq = tok_l2.texts_to_sequences([texto_limpo])
+        pad = pad_sequences(seq, maxlen=64, padding='pre', truncating='post')
+        score = float(mod_l2.predict(pad, verbose=0)[0][0])
+        
+    elif req.level == '3':
+        texto_limpo = limpar_texto_base(req.text)
+        encodings = tok_l3([texto_limpo], truncation=True, padding='max_length', max_length=64, return_tensors='tf')
+        logits = mod_l3(encodings).logits
+        score = float(tf.nn.sigmoid(logits)[0][0])
+        
+    else:
+        raise HTTPException(status_code=400, detail="Nível inválido")
+
+    is_offensive = bool(score > 0.5)
+    
+    return {
+        "offensive": is_offensive,
+        "confidence": round(score * 100, 2),
+        "level_used": req.level
+    }
+
+# --- Servindo os arquivos estáticos do Frontend ---
+app.mount("/styles", StaticFiles(directory="frontend/styles"), name="styles")
+app.mount("/javascript", StaticFiles(directory="frontend/javascript"), name="javascript")
+
+@app.get("/")
+async def index():
+    return FileResponse("frontend/index.html")
